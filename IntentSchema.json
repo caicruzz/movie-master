@@ -1,0 +1,19 @@
+{
+  "intents": [
+    {
+      "intent": "getUpcomingMoviesIntent"
+    },
+    {
+      "intent": "getNowShowingMoviesIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
+    },
+    {
+      "intent": "AMAZON.CancelIntent"
+    },
+    {
+      "intent": "AMAZON.HelpIntent"
+    }
+  ]
+}

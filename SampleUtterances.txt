@@ -1,0 +1,19 @@
+getUpcomingMoviesIntent give me the upcoming movies
+getUpcomingMoviesIntent upcoming movies
+getUpcomingMoviesIntent movies coming soon
+getUpcomingMoviesIntent tell me the upcoming movies
+getUpcomingMoviesIntent tell me the movies coming soon
+getUpcomingMoviesIntent upcoming
+getUpcomingMoviesIntent coming soon
+getNowShowingMoviesIntent give me the now showing movies
+getNowShowingMoviesIntent now showing movies
+getNowShowingMoviesIntent movies now showing
+getNowShowingMoviesIntent tell me the now showing movies
+getNowShowingMoviesIntent tell me the movies now showing
+getNowShowingMoviesIntent give me the now playing movies
+getNowShowingMoviesIntent now playing movies
+getNowShowingMoviesIntent movies now playing
+getNowShowingMoviesIntent tell me the now playing movies
+getNowShowingMoviesIntent tell me the movies now playing
+getNowShowingMoviesIntent now playing
+getNowShowingMoviesIntent now showing

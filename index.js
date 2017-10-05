@@ -1,10 +1,6 @@
-var upcomingMoviesArr = [
-  "wonder woman","transformers 5","Despicable me 3"
-];
-
-var nowShowingMoviesArr = [
-  "Pirates of the caribbean", "John wick: chapter 2, cars 3"
-];
+var request = require("request");
+var nowPlayingMoviesUrl = "https://api.themoviedb.org/3/movie/now_playing?api_key=myPrivateKey&language=en-US&region=US";
+var upcomingMoviesUrl = "https://api.themoviedb.org/3/movie/upcoming?api_key=myPrivateKey&language=en-US&page=1&region=US";
 // Route the incoming request based on type (LaunchRequest, IntentRequest,
 // etc.) The JSON body of the request is provided in the event parameter.
 exports.handler = function (event, context) {
@@ -16,9 +12,9 @@ exports.handler = function (event, context) {
          * prevent someone else from configuring a skill that sends requests to this function.
          */
 
-    // if (event.session.application.applicationId !== "") {
-    //     context.fail("Invalid Application ID");
-    //  }
+        if (event.session.application.applicationId !== "amzn1.ask.skill.6f842059-4bc8-4033-a540-ed3a1ae0c470") {
+            context.fail("Invalid Application ID");
+         }
 
         if (event.session.new) {
             onSessionStarted({requestId: event.request.requestId}, event.session);
@@ -94,56 +90,86 @@ function onSessionEnded(sessionEndedRequest, session) {
 // ------- Skill specific logic -------
 
 function getWelcomeResponse(callback) {
-    var speechOutput = "Welcome to Movie Master. You can ask me for the upcoming or now playing movies";
 
-    var reprompt = "Would you like to hear the upcoming or the now playing movies?";
+  var speechOutput = "Welcome to Movie Master, powered by The Movie Database API. You can ask me for the upcoming or now playing movies";
 
-    var header = "Movie Master";
+  var reprompt = "Would you like to hear the upcoming or the now playing movies?";
 
-    var shouldEndSession = false;
+  var header = "Movie Master";
+
+  var shouldEndSession = false;
+
+  var sessionAttributes = {
+    "speechOutput" : speechOutput,
+    "repromptText" : reprompt
+  }
+
+  callback(sessionAttributes, buildSpeechletResponse(header,speechOutput,reprompt,shouldEndSession));
+}
+
+function handleUpcomingMoviesResponse(intent, seesion, callback) {
+
+  getUpcomingMovs(function(data) {
+    if(data != "ERROR") {
+      var speechOutput = "The upcoming movies are " + data;
+    }
+
+    var reprompt = "Ask me for the upcoming or now playing movies";
+    var header = "Upcoming Movies";
+    var shouldEndSession = true;
 
     var sessionAttributes = {
       "speechOutput" : speechOutput,
       "repromptText" : reprompt
     }
-
     callback(sessionAttributes, buildSpeechletResponse(header,speechOutput,reprompt,shouldEndSession));
-}
-
-function handleUpcomingMoviesResponse(intent, seesion, callback) {
-  var speechOutput = "The upcoming movies are ";
-  upcomingMoviesArr.forEach(function(movie) {
-    speechOutput += movie + ", ";
   });
-
-
-  var reprompt = "Ask me for the upcoming or now playing movies";
-  var header = "Upcoming Movies";
-  var shouldEndSession = false;
-
-  var sessionAttributes = {
-    "speechOutput" : speechOutput,
-    "repromptText" : reprompt
-  }
-
-  callback(sessionAttributes, buildSpeechletResponse(header,speechOutput,reprompt,shouldEndSession));
 }
 
 function handleNowShowingMoviesIntent(intent, seesion, callback) {
-  var speechOutput = "The now playing movies are ";
-  nowShowingMoviesArr.forEach(function(movie) {
-    speechOutput += movie + ", ";
+  getNowPlayingMovs(function(data) {
+    if(data != "ERROR") {
+      var speechOutput = "The now playing movies are " + data;
+    }
+
+    var reprompt = "Ask me for the upcoming or now playing movies";
+    var header = "Now Playing Movies";
+    var shouldEndSession = true;
+
+    var sessionAttributes = {
+      "speechOutput" : speechOutput,
+      "repromptText" : reprompt
+    }
+    callback(sessionAttributes, buildSpeechletResponse(header,speechOutput,reprompt,shouldEndSession));
   });
+}
 
-  var reprompt = "Ask me for the upcoming or now playing movies";
-  var header = "Now Playing Movies";
-  var shouldEndSession = false;
-  var sessionAttributes = {
-    "speechOutput" : speechOutput,
-    "repromptText" : reprompt
-  }
+function getNowPlayingMovs(callback) {
+  var parsedData = "Error";
+  request(nowPlayingMoviesUrl, function(error,response, body) {
+    if(!error && response.statusCode == 200) {
+        var data = JSON.parse(body);
+        var parsedData = "";
+        data["results"].forEach(function(movie) {
+            parsedData += movie["title"] + ", ";
+        });
+    }
+    callback(parsedData);
+  });
+}
 
-  callback(sessionAttributes, buildSpeechletResponse(header,speechOutput,reprompt,shouldEndSession));
+function getUpcomingMovs(callback) {
+  var parsedData = "Error";
+  request(upcomingMoviesUrl, function(error,response, body) {
+    if(!error && response.statusCode == 200) {
+        var data = JSON.parse(body);
+        var parsedData = "";
+        data["results"].forEach(function(movie) {
+            parsedData += movie["title"] + ", ";
+        });
+    }
+    callback(parsedData);
+  });
 }
 
 function handleGetHelpRequest(intent, session, callback) {
@@ -162,7 +188,7 @@ function handleGetHelpRequest(intent, session, callback) {
 function handleFinishSessionRequest(intent, session, callback) {
     // End the session with a "Good bye!" if the user wants to quit the game
     callback(session.attributes,
-        buildSpeechletResponseWithoutCard("Good bye! Thank you for using Movie Master", "", true));
+        buildSpeechletResponseWithoutCard("Good bye! Thank you for using Movie Master, powered by The Movie Database API", "", true));
 }
 
 
